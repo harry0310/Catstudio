@@ -1,0 +1,344 @@
+define(
+    [ "common", "domReady!" ],
+    function(common) {
+      // the minimum time between renders when scrolling/resizing
+      var SCROLL_RENDER_INTERVAL_MILLIS = 250;
+      var RESIZE_RENDER_INTERVAL_MILLIS = 200;
+      var CANVAS_CONTAINER_CLASS = "canvas-container";
+
+      var PDFRenderer = {};
+      var currentPages  = [];
+      var renderQueue = []; //cache the latest render() arguments
+      
+      /**
+       * Render the pdf specified by url. The append container must contain a
+       * link whose src attribute == url, and the pdf will be rendered directly
+       * beneath the link element. Pages are lazy-loaded based on their distance
+       * from the bottom of the viewport. All pages that are visible will be
+       * rendered, and some number of pages will be prefetched to provide
+       * minimize wait times.
+       * 
+       * If there are multiple pdfs to render in a page, rendering will be
+       * serialized based on the order of the calls to render().
+       * 
+       * Execute should be passed a configuration object with the following
+       * options. Any field not explicitly marked optional is required:
+       * 
+       * @param appendContainer
+       *          The container that contains a link to the configured url. The
+       *          rendered pdf pages will be appended directly below the link
+       *          found in appendContainer. If no link corresponding to url is
+       *          found in appendContainer, the pdf will not be rendered.
+       * @param url
+       *          The url to the pdf resource to be rendered.
+       * @param number
+       *          The ordinal of the pdf to be rendered in the document. e.g. if
+       *          there are three pdfs in the appendContainer, and url refers to
+       *          the 2nd, this would be 2
+       * @param iFrameWindow
+       *          Optional parameter. If the pdf should be rendered inside an
+       *          iframe, the appendContainer will refer to the parent of our
+       *          processing DOM node, and iFrameWindow should refer to the
+       *          iframe in question.
+       * @param scrollContainer
+       *          Optional parameter. The pdf pages will be lazy-loaded based
+       *          their distance from the viewport. On scroll, we will check to
+       *          see if any pages should now be loaded. By default this scroll
+       *          handler will be registered on iFrameWindow in the case that it
+       *          is provided, otherwise to appendContainer. The window to watch
+       *          for scrolling to decide when to render previously hidden pdf
+       *          pages. If scrollContainer is specified, the container
+       *          specified by scrollContainer will be used instead.
+       * 
+       */
+      PDFRenderer.render = function(config) {
+        /*
+         * pdf.js crashes IE 7/8, so nest the require to avoid loading it and
+         * breaking things
+         */
+        if (common.isIE7 || common.isIE8 || common.isIE9) {
+          return;
+        }
+
+        /*
+         * If config is not provided, we just look to see if anything on the
+         * queue can be processed.
+         */
+        if (config) {
+          // If this is the first pdf in a document, we may have switched documents, so make sure we clear any waiting renders
+          if (!config.number || config.number.value_0 == 0) {
+            renderQueue = []; // new set of pdfs (meaning a new note). reset
+                                // cache
+          }
+          renderQueue.push(config); // this will cache all pdfs for a note
+        }
+        
+
+        var currentPagesLength = currentPages.length;
+        var okToRender = true;
+        /**
+         * Check to see if we can process the queued render tasks. Note that the
+         * pages array is 1-indexed.
+         * 
+         * We need to check to see if the promises for all the pages currently
+         * being processed (from a previous call to render) are resolved, the
+         * pages exist, and the pages are not currently rendering before
+         * processing a new PDF.
+         * 
+         * Ideally we would be using the currentPages.then() promise syntax, but
+         * this is difficult to implement until there is a similar promise
+         * resolved when the rendering operation is finished. So we're stuck
+         * polling the internal promise variables for now.
+         */
+        for (var ind = 1; ind < currentPagesLength; ++ind) {
+          if (currentPages[ind]._value
+              && currentPages[ind]._value.renderTasks.length) {
+            //if any conditions are true, try again
+            setTimeout(PDFRenderer.render, 100);
+            return;
+          }
+        }
+        // The queued render operations are ready to be executed, execute them here.
+        while (renderQueue.length) {
+          execute(renderQueue.shift());
+        }
+      };
+
+      function execute(config) {
+        // Extract the value from any gwt-wrapper number objects that are passed.
+        var pdfNumber = (config.number.value_0 || config.number.value_0 === 0) ? config.number.value_0 : config.number;
+        require(
+            [ "jquery", "pdf-compatibility", "pdf" ],
+            function($) {
+              // Append PDFs inline to their relative download links
+              var appendContainer = $(config.appendContainer);
+              var appendLocation = createAppendLocation(appendContainer);
+              if (appendLocation === false) {
+                return;
+              }
+
+              if (config.iFrameWindow && appendLocation) {
+                $(".dummyAppendLocation").remove();
+
+                //create a fake append location on the parent dom to render the canvases
+                var dummyAppendLocation = appendLocation.clone(true).
+                    attr("class", "dummyAppendLocation").
+                    css({
+                      visibility: "hidden",
+                      position: "fixed" // WEB-16030 Fix window scrolling bug.
+                    }).appendTo($("body"));
+              }
+              // jQuery window object
+              var WINDOW = $(config.iFrameWindow || window);
+              var SCROLL_CONTAINER = $(config.scrollContainer || WINDOW);
+              // the pdfId represents the index of the pdf if multiple pdfs
+              // are being rendered on a page
+              var pdfId =  pdfNumber || "";
+
+              PDFJS.disableWorker = (typeof Worker === "undefined" || !window.Worker);
+              // Pages within (multiplier * window height) pixels of the top of the
+              // window will be rendered. If we don't have web workers, render fewer pages
+              var PREFETCH_WINDOW_MULTIPLIER = PDFJS.disableWorker ? 1 : 4;
+
+              PDFJS.workerSrc = require.toUrl("pdf-worker.js");
+              var pdf = null, l = 0;
+
+              /**
+               * Finds the location of an existing download link and returns an append location
+               * if the download link cant be found returns the container itself for appending
+               */
+              function createAppendLocation(appendContainer) {
+                var location = appendContainer.find("a[href*='" + config.url + "']");
+                if (location.length) {
+                  var newContainer = $("<div>").css({
+                    "width" : "100%",
+                    "display" : "inline-block"
+                  });
+
+                  /*
+                   * FIXME: We assume that "location" is an anchor, whose parent is the
+                   * attachment container element. We need to decouple the representation
+                   * of the attachment with this file.
+                   */
+                  newContainer.insertAfter(location.parent()).html("&nbsp");
+                  return newContainer;
+                }
+                // if we can't find the download links return false
+                return false;
+              }
+
+              /**
+               * Grabs promises for the pages and inserts them into the pages[]
+               * array and renders a container/placeholder div per page
+               */
+              function initializePages(pdf, l) {
+                appendLocation.find(".canvas-container").remove();
+                var pages = [], i = 1;
+                var page;
+                for (i; i <= l; i++) {
+                  page = pdf.getPage(i);
+                  page.then(getPage);
+                  pages[i] = page;
+                }
+                return pages;
+              }
+
+              /**
+               * renders all pages close to the current window
+               */
+              function renderWindow(pages, l) {
+                var i = 1;
+                for (i; i <= l; i++) {
+                  pages[i].then(renderPage);
+                }
+              }
+
+              /**
+               * Determines if a page should be rendered based on its position
+               * relative to the window.
+               * Pages must be:
+               *   1) not yet rendered
+               *   2) within a certain distance of the viewport
+               */
+              function shouldRender(page) {
+                var j = getPageIndex(page);
+                var el = appendContainer.find("#" + CANVAS_CONTAINER_CLASS
+                    + pdfId + "-" + j);
+                if (config.iFrameWindow) {
+                  var tempAppendNode = dummyAppendLocation.find("#"
+                      + CANVAS_CONTAINER_CLASS + pdfId + "-" + j);
+                }
+                // we haven't previously rendered this pdf
+                return (el.children().length < 1 && (!config.iFrameWindow || tempAppendNode
+                    .children().length < 1))
+                    // the iframe exists if applicable
+                    && el.offset().top !== 0
+                    // The page is close enough to the viewport to be rendered
+                    && (Math
+                        .abs(SCROLL_CONTAINER.scrollTop() - el.offset().top) < ($(
+                        window).height() * PREFETCH_WINDOW_MULTIPLIER));
+              }
+
+              /**
+               * Returns the page number
+               */
+              function getPageIndex(page) {
+                return page.pageInfo.pageIndex + 1;
+              }
+
+              /**
+               * Gets a page object and renders it's container div
+               */
+              function getPage(page) {
+                var j = getPageIndex(page);
+                var viewport = page.getViewport(calculateScale(page));
+                var newDiv = appendLocation.find("#" + CANVAS_CONTAINER_CLASS
+                    + pdfId + "-" + j);
+                if (!newDiv.length) {
+                  newDiv = $("<div>").addClass(CANVAS_CONTAINER_CLASS);
+                  newDiv.attr("id", CANVAS_CONTAINER_CLASS + pdfId + "-" + j);
+                  newDiv.height(Math.ceil(viewport.height)).width(
+                      Math.ceil(viewport.width - 1)).html("&nbsp;");
+                  if (config.iIframeWindow) {
+                    // deep clone the container
+                    dummyAppendLocation.append(newDiv.clone(true));
+                  }
+                  appendLocation.append(newDiv);
+                  return;
+                }
+                newDiv.height(Math.ceil(viewport.height)).width(
+                    Math.ceil(viewport.width - 1)).html("&nbsp;");
+              }
+
+              function calculateScale(page) {
+                var viewport = page.getViewport(1);
+                return appendContainer.width() / viewport.width;
+              }
+
+              /**
+               * Draws an actual page onto a canvas within it's container div
+               */
+              function renderPage(page) {
+                if (!shouldRender(page)) {
+                  return;
+                }
+                var j = getPageIndex(page);
+                var newCanvas = $("<canvas>");
+                var canvas = newCanvas.get(0);
+                var viewport = page.getViewport(calculateScale(page));
+                canvas.width = viewport.width - 1;
+                canvas.height = viewport.height;
+                newCanvas.height(Math.ceil(viewport.height)).width(
+                    Math.ceil(viewport.width - 1));
+                page.render({
+                  canvasContext : canvas.getContext('2d'),
+                  viewport : viewport
+                });
+                if (config.iFrameWindow) { //if we're in an iFrame we need to render on the parent
+                  dummyAppendLocation.find("#" + CANVAS_CONTAINER_CLASS
+ +
+                    pdfId + "-" + j).html("").append(newCanvas);
+                  moveAfterRender(page, newCanvas, j);
+                  return;
+                }
+                appendContainer.find("#" + CANVAS_CONTAINER_CLASS
+ +
+                  pdfId + "-" + j).html("").append(newCanvas);
+              }
+
+              /**
+               * Moves a rendering canvas into the iFrame once it's fully renderered
+               */
+              function moveAfterRender(page, canvas, pageNum) {
+                //if the page still has render tasks, it's not ready to be moved
+                if (page.renderTasks.length) {
+                  setTimeout( function() { moveAfterRender(page, canvas, pageNum); }, 100);
+                  return;
+                }
+                appendContainer.find(
+                    "#" + CANVAS_CONTAINER_CLASS + pdfId + "-" + pageNum).html(
+                    "").append(canvas);
+              }
+
+              appendContainer.css("overflow", "hidden");
+              PDFJS
+                  .getDocument(config.url)
+                  .then(
+                    function getPdf(_pdf) {
+                      pdf = _pdf;
+                      l = pdf.pdfInfo.numPages;
+                      var pages = initializePages(pdf, l);
+                      if (pdfNumber === 0) {
+                        currentPages = pages;
+                      } else {
+                        currentPages.concat(pages);
+                      }
+                      renderWindow(pages, l);
+
+                      var scrollTimer;
+                      // Register the lazy loader event handler
+                      SCROLL_CONTAINER.scroll(function() {
+                        clearTimeout(scrollTimer);
+                        // Render after the user has stopped scrolling for some time.
+                        scrollTimer = setTimeout(function() {
+                          renderWindow(pages, l);
+                        }, SCROLL_RENDER_INTERVAL_MILLIS);
+                      });
+                      var resizeTimer;
+                      WINDOW.resize(function() {
+                        clearTimeout(resizeTimer);
+                        // resize once we are sure the user is done resizing
+                        resizeTimer = setTimeout(function() {
+                          pages = initializePages(pdf, l);
+                          renderWindow(pages, l);
+                        }, RESIZE_RENDER_INTERVAL_MILLIS);
+                      });
+                    });
+              //if we are within the iframe enable scrolling
+              if (config.iFrameWindow) {
+                appendContainer.css("overflow", "auto");
+              }
+            });
+      };
+      return PDFRenderer;
+    });

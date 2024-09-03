@@ -1,0 +1,288 @@
+define(
+    [ 'jquery', 'common', 'ga-util', 'resolve!i18n', 'templates', 'text!SharingMenuBase/SharingMenu.html',
+        'css!SharingMenuBase/SharingMenu', 'domReady!' ],
+    function($, common, ga, i18n, templates, sharingMenuTemplate) {
+      templates.addTemplate("SharingMenu", sharingMenuTemplate);
+
+      // Constants
+      var INVALID_IDX = -1;
+      var KEY_DOWN = 40;
+      var KEY_ENTER = 13;
+      var KEY_ESCAPE = 27;
+      var KEY_J = 74;
+      var KEY_K = 75;
+      var KEY_NUMPAD_2 = 98;
+      var KEY_NUMPAD_8 = 104;
+      var KEY_UP = 38;
+      var MENU_BAR_DIV_SELECTOR = '.sharing-menu .menu-bar-div';
+      var FACEBOOK_CLASS = 'facebook';
+      var FACEBOOK_ICON_CLASS = 'facebook-icon';
+      var LINK_CLASS = 'link';
+      var LINK_ICON_CLASS = 'link-icon';
+      var LINKEDIN_CLASS = 'linkedin';
+      var LINKEDIN_ICON_CLASS = 'linkedin-icon';
+      var TWITTER_CLASS = 'twitter';
+      var TWITTER_ICON_CLASS = 'twitter-icon';
+      var SELECTED_CLASS = 'selected';
+      var GA_EVENTS = {
+        'category': 'Single Note',
+        'action': 'Share'
+      };
+
+      /*
+       * The following is a hack to display the lightbox at column9 for
+       * mobile-portrait and column15 for everything else. TODO - move to a
+       * require module?
+       */
+      var mobileCutoff = window.devicePixelRatio * 480 || 480;
+      var lightBoxWidth = screen.width >= mobileCutoff ? 15 * 32 : 9 * 32;
+
+      /**
+       * Constructs a SharingMenu.
+       *
+       * @param location
+       *          where to render the sharing menu inside of (may be either a
+       *          jquery object or a selector)
+       * @param shareNoteUri
+       *          The base url that sharing requests should be sent to with the
+       *          name of the service being shared to appeded.
+       * @param showFacebook
+       *          Whether to show share to facebook option in the menu
+       * @param showTwitter
+       *          Whether to show share to twitter option in the menu
+       * @param showLinkedIn
+       *          Whether to show share to linkedIn option in the menu
+       * @param customStylesheet
+       *          If present, the name of an additional css stylesheet to load for this component
+       */
+      var SharingMenu = function(location, shareNoteUri, showFacebook,
+          showTwitter, showLinkedIn, customStylesheet) {
+        this._location = $(location);
+        this._shareNoteUri = shareNoteUri;
+        this._showFacebook = showFacebook;
+        this._showTwitter = showTwitter;
+        this._showLinkedIn = showLinkedIn;
+
+        // TODO: find a better way to load this for the component
+        var stylesheet = "/redesign/global/js/component/SharingMenu/NormalSharingMenu.css";
+        if (customStylesheet) {
+          stylesheet = customStylesheet;
+        }
+        common.loadCss(stylesheet);
+      };
+
+      SharingMenu.prototype.init = function() {
+        if (this._initialized) {
+          return;
+        } else {
+          this._initialized = true;
+        }
+        var self = this;
+
+        // append the template to the dom
+        self._location.append(templates.SharingMenu({
+          menuItemLabelFacebook : i18n.L("SharingMenu.menuItem.facebook"),
+          menuItemLabelTwitter : i18n.L("SharingMenu.menuItem.twitter"),
+          menuItemLabelLinkedIn : i18n.L("SharingMenu.menuItem.linkedin"),
+          menuItemLabelLink : i18n.L("SharingMenu.menuItem.link"),
+          sharingMenuButtonLabel : i18n.L("SharingMenu.button.share"),
+
+
+          showFacebook : this._showFacebook,
+          showTwitter : this._showTwitter,
+          showLinkedIn : this._showLinkedIn
+        }));
+
+        // jQuery references
+        var menuBar = self._location.find('.sharing-menu > .menu-bar');
+        var menuBarDivs = self._location.find(MENU_BAR_DIV_SELECTOR);
+        var shareButtonLabelIcon = self._location.find('.sharing-menu .label-icon');
+        var shareButtonIconContainer = self._location.find('.sharing-menu .icon-container');
+        var shareButtonLabelContainer = self._location.find('.sharing-menu .label-container');
+
+        // Global variables
+        var currentIdx = INVALID_IDX;
+        var showing = false;
+        var totalDivs = menuBarDivs.length;
+
+        var menuItems = {
+          facebook : {
+            menuItemClass : FACEBOOK_CLASS,
+            iconClass : FACEBOOK_ICON_CLASS,
+            callback : function() {
+
+              ga.trackEvent(GA_EVENTS.category, GA_EVENTS.action, 'Facebook');
+              window.open(self._shareNoteUri + "feed", "sharewindow",
+                  "height=250,width=400");
+            }
+          },
+
+          twitter : {
+            menuItemClass : TWITTER_CLASS,
+            iconClass : TWITTER_ICON_CLASS,
+            callback : function() {
+
+              ga.trackEvent(GA_EVENTS.category, GA_EVENTS.action, 'Twitter');
+              window.open(self._shareNoteUri + "twitter", "sharewindow",
+                  "height=420,width=550");
+            }
+          },
+
+          linkedIn : {
+            menuItemClass : LINKEDIN_CLASS,
+            iconClass : LINKEDIN_ICON_CLASS,
+            callback : function() {
+              ga.trackEvent(GA_EVENTS.category, GA_EVENTS.action, 'LinkedIn');
+              window.open(self._shareNoteUri + "linkedin", "sharewindow",
+                  "height=520,width=550");
+            }
+          },
+
+          link : {
+            menuItemClass : LINK_CLASS,
+            iconClass : LINK_ICON_CLASS,
+            callback : function() {
+              ga.trackEvent(GA_EVENTS.category, GA_EVENTS.action, 'Note Link');
+              window.linkUrlDialog.show(window.location.href, {
+                width : lightBoxWidth
+              });
+            }
+          }
+        };
+
+        var changeSelected = function(increment) {
+          if (currentIdx == INVALID_IDX) {
+            // No selection yet; choose first or last.
+            currentIdx = increment ? 0 : totalDivs - 1;
+          } else {
+            menuBarDivs.eq(currentIdx).removeClass(SELECTED_CLASS);
+            currentIdx += increment ? 1 : -1;
+            currentIdx %= totalDivs;
+            if (currentIdx < 0) {
+              // If currentIdx was -1, then in javascript:
+              // -1 % totalDivs == -1
+              // But we actually want:
+              currentIdx = totalDivs - 1;
+            }
+          }
+          menuBarDivs.eq(currentIdx).addClass(SELECTED_CLASS);
+        };
+
+        var getMenuItemDiv = function(menuItem) {
+          return $(MENU_BAR_DIV_SELECTOR + '.' + menuItem['menuItemClass']);
+        };
+
+        var lastSelection = getMenuItemDiv(menuItems['facebook']).length > 0 ? menuItems['facebook']
+            : menuItems['link'];
+
+        var keyBindingCallback = function(e) {
+          switch (e.which) {
+          case KEY_ESCAPE:
+            e.preventDefault();
+            hide();
+            break;
+          case KEY_UP:
+          case KEY_K:
+          case KEY_NUMPAD_8:
+            e.preventDefault();
+            changeSelected(false);
+            break;
+          case KEY_DOWN:
+          case KEY_J:
+          case KEY_NUMPAD_2:
+            e.preventDefault();
+            changeSelected(true);
+            break;
+          case KEY_ENTER:
+            e.preventDefault();
+            invokeClickCallback(currentIdx);
+            break;
+          }
+        };
+
+        var hide = function() {
+          if (!showing) {
+            return;
+          }
+          menuBarDivs.eq(currentIdx).removeClass(SELECTED_CLASS);
+          menuBar.hide();
+          showing = false;
+          $(document).unbind('keydown', keyBindingCallback);
+          $('html').unbind('click', hide);
+        };
+
+        var invokeClickCallback = function(menuItem) {
+          if (menuItem == null) {
+            return;
+          }
+
+          shareButtonLabelIcon.removeClass(lastSelection.iconClass).addClass(
+              menuItem.iconClass);
+          lastSeletion = menuItem;
+          menuItem.callback();
+        };
+
+        var mouseenterCallback = function(e) {
+          menuBarDivs.eq(currentIdx).removeClass(SELECTED_CLASS);
+          $(this).addClass(SELECTED_CLASS);
+          currentIdx = e.data.idx;
+        };
+
+        var setPosition = function(top, left) {
+          if (top) {
+            menuBar.css('top', top);
+          }
+          if (left) {
+            menuBar.css('left', left);
+          }
+        };
+
+        var setupAutoHide = function() {
+          $('html').one('click', hide);
+        };
+
+        var show = function(top, left) {
+          if (!totalDivs) {
+            return;
+          }
+          setPosition(top, left);
+          showing = true;
+          menuBar.show();
+          $(document).bind('keydown', keyBindingCallback);
+
+          // Absorb the first click, and make the second call hide().
+          // Necessary because show() is called within a click handler,
+          // and so this new click handler for <html> is triggered
+          // automatically.
+          $('html').one('click', setupAutoHide);
+
+          currentIdx = INVALID_IDX;
+        };
+
+        // Initialization - click and mouseenter handlers.
+        $.each(menuItems, function(key, value) {
+          var div = getMenuItemDiv(value);
+
+          if (div.length > 0) {
+            div.click(function() {
+              invokeClickCallback(value);
+            });
+
+            div.mouseenter({
+              idx : menuBarDivs.index(div)
+            }, mouseenterCallback);
+          }
+        });
+
+        shareButtonIconContainer.click(function() {
+          ga.trackEvent(GA_EVENTS.category, GA_EVENTS.action, 'Share');
+          showing ? hide() : show();
+        });
+
+        shareButtonLabelContainer.click(function() {
+          invokeClickCallback(lastSelection);
+        });
+      };
+
+      return SharingMenu;
+    });

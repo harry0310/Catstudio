@@ -1,0 +1,653 @@
+/**
+ * Copyright 2012-2015 Evernote Corporation.
+ */
+/* Copyright 2012, Evernote Corp
+ *
+ * author: Andrei Thorp, athorp@evernote.com
+ */
+/*** Evernote CSS Framework ***/
+#imggal-container {
+  position: relative;
+  z-index: 2147483647;
+}
+.hidden {
+  display: none;
+}
+#imggal-glass {
+  position: fixed;
+  z-index: inherit;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  opacity: 0.95;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=95);
+  filter: alpha(opacity=95);
+}
+#imggal-container:-moz-full-screen #imggal-glass {
+  background-color: #ffffff;
+  opacity: 1;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  filter: alpha(opacity=100);
+}
+#imggal-container:-webkit-full-screen #imggal-glass {
+  background-color: #ffffff;
+  opacity: 1;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  filter: alpha(opacity=100);
+}
+#imggal-top {
+  position: fixed;
+  z-index: inherit;
+  -webkit-transition: opacity 0.5s ease-in-out;
+  -moz-transition: opacity 0.5s ease-in-out;
+  -ms-transition: opacity 0.5s ease-in-out;
+  -o-transition: opacity 0.5s ease-in-out;
+  transition: opacity 0.5s ease-in-out;
+}
+#imggal-top.nav-full {
+  display: none;
+}
+#imggal-top .close-icon {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  height: 40px;
+  width: 40px;
+  margin: 0 !important;
+  border: 1px solid #f1f1f1;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.06);
+  background-position: center center !important;
+  background-color: white !important;
+}
+@media all {
+  #imggal-top .close-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-close.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) #imggal-top .close-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-close@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+#imggal-top .close-icon:hover {
+  border-color: #2dbe60;
+}
+@media all {
+  #imggal-top .close-icon:hover {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-close-hover.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) #imggal-top .close-icon:hover {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-close-hover@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+#imggal-top .close-icon:active {
+  border-color: #28a955;
+}
+@media all {
+  #imggal-top .close-icon:active {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-close-active.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) #imggal-top .close-icon:active {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-close-active@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+#imggal-nav,
+#imggal-nav-glass {
+  position: fixed;
+  z-index: inherit;
+  left: 0px;
+  right: 0px;
+  bottom: 10px;
+  width: 232px;
+  height: 52px;
+  margin: 0 auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+  -webkit-transition: opacity 0.5s ease-in-out;
+  -moz-transition: opacity 0.5s ease-in-out;
+  -ms-transition: opacity 0.5s ease-in-out;
+  -o-transition: opacity 0.5s ease-in-out;
+  transition: opacity 0.5s ease-in-out;
+}
+#imggal-nav.nav-full,
+#imggal-nav-glass.nav-full {
+  width: 180px;
+}
+#imggal-nav.nav-no-full,
+#imggal-nav-glass.nav-no-full {
+  width: 192px;
+}
+#imggal-nav.nav-hidden,
+#imggal-nav-glass.nav-hidden {
+  opacity: 0;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  filter: alpha(opacity=0);
+}
+html.ie7 #imggal-nav,
+html.ie7 #imggal-nav-glass {
+  left: 50%;
+  margin-left: -76px;
+}
+#imggal-nav-glass {
+  background-color: #ffffff;
+  border: 1px solid #f1f1f1;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  opacity: 0.96;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=96);
+  filter: alpha(opacity=96);
+}
+.icons {
+  position: static;
+  float: left;
+  margin-top: 14px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  -webkit-transition: opacity 0.2s ease-in-out;
+  -moz-transition: opacity 0.2s ease-in-out;
+  -ms-transition: opacity 0.2s ease-in-out;
+  -o-transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: -moz-none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.icons:hover {
+  opacity: 1;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100);
+  filter: alpha(opacity=100);
+}
+.icons.grayed-out,
+.icons.grayed-out:hover {
+  cursor: default;
+  opacity: 0.3;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);
+  filter: alpha(opacity=30);
+}
+html.ie8 .nav-hidden > .icons {
+  filter: inherit;
+}
+/* nav bar icons  */
+.prev-icon {
+  height: 24px;
+  width: 24px;
+  margin-left: 11px;
+  margin-right: 13px;
+}
+@media all {
+  .prev-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-back.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .prev-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-back@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .prev-icon:hover:not(.grayed-out) {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-back-hover.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .prev-icon:hover:not(.grayed-out) {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-back-hover@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .prev-icon:active:not(.grayed-out) {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-back-active.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .prev-icon:active:not(.grayed-out) {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-back-active@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+.next-icon {
+  height: 24px;
+  width: 24px;
+  margin-right: 12px;
+}
+@media all {
+  .next-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-next.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .next-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-next@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .next-icon:hover:not(.grayed-out) {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-next-hover.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .next-icon:hover:not(.grayed-out) {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-next-hover@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .next-icon:active:not(.grayed-out) {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-next-active.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .next-icon:active:not(.grayed-out) {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-next-active@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+.download-icon {
+  height: 24px;
+  width: 24px;
+  margin-left: 14px;
+  margin-right: 14px;
+}
+@media all {
+  .download-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-download.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .download-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-download@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .download-icon:hover {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-download-hover.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .download-icon:hover {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-download-hover@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .download-icon:active {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-download-active.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .download-icon:active {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-download-active@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+.new-tab-icon {
+  height: 24px;
+  width: 24px;
+  margin-left: 17px;
+  margin-right: 13px;
+}
+@media all {
+  .new-tab-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-new-tab.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .new-tab-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-new-tab@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .new-tab-icon:hover {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-new-tab-hover.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .new-tab-icon:hover {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-new-tab-hover@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .new-tab-icon:active {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-new-tab-active.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .new-tab-icon:active {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-new-tab-active@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+.full-screen-icon {
+  height: 24px;
+  width: 24px;
+  margin-right: 16px;
+}
+@media all {
+  .full-screen-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .full-screen-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .full-screen-icon:hover {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen-hover.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .full-screen-icon:hover {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen-hover@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .full-screen-icon:active {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen-active.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .full-screen-icon:active {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen-active@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+.nav-full > .full-screen-icon,
+.nav-no-full > .full-screen-icon {
+  display: none;
+}
+.nav-full > .close-icon,
+.nav-full > .download-icon {
+  display: none;
+}
+.close-full-screen-icon {
+  display: none;
+}
+.nav-full > .close-full-screen-icon {
+  display: block;
+  height: 24px;
+  width: 24px;
+  margin-right: 16px;
+}
+@media all {
+  .nav-full > .close-full-screen-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen-close.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .nav-full > .close-full-screen-icon {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen-close@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .nav-full > .close-full-screen-icon:hover {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen-close-hover.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .nav-full > .close-full-screen-icon:hover {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen-close-hover@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all {
+  .nav-full > .close-full-screen-icon:active {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen-close-active.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+@media all and (-moz-min-device-pixel-ratio: 1.5), all and (-o-min-device-pixel-ratio: 3/2), all and (-webkit-min-device-pixel-ratio: 1.5), all and (min-device-pixel-ratio: 1.5), all and (min-resolution: 1.5dppx) {
+  html:not(.ie8) .nav-full > .close-full-screen-icon:active {
+    background:  url('/redesign/global/js/component/ImageGallery/img/gallery-full-screen-close-active@2x.png') no-repeat;
+    -webkit-background-size: 24px 24px;
+    -moz-background-size: 24px 24px;
+    -o-background-size: 24px 24px;
+    background-size: 24px 24px;
+  }
+}
+.gallery-divider {
+  float: left;
+  margin-top: 12px;
+  margin-bottom: 13px;
+  height: 27px;
+  border-left: 1px solid #e1e1e1;
+}
+#imggal-images {
+  top: 25px;
+  bottom: 25px;
+  left: 25px;
+  right: 25px;
+  position: fixed;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: -moz-none;
+  -ms-user-select: none;
+  user-select: none;
+  z-index: inherit;
+}
+#imggal-container:-moz-full-screen #imggal-images {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+#imggal-container:-webkit-full-screen #imggal-images {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.image {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: -moz-none;
+  -ms-user-select: none;
+  user-select: none;
+  margin: auto;
+  max-height: 100%;
+  max-width: 100%;
+  position: absolute;
+  transition: transform 0.2s ease;
+  -moz-transition: -moz-transform 0.2s ease;
+  -webkit-transition: -webkit-transform 0.2s ease;
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+  -o-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  visibility: visible;
+}
+.image.off-screen {
+  transition: transform 0.2s ease, visibility 0s linear 0.2s;
+  -moz-transition: -moz-transform 0.2s ease, visibility 0s linear 0.2s;
+  -webkit-transition: -webkit-transform 0.2s ease, visibility 0s linear 0.2s;
+  visibility: hidden;
+}
+.image.off-screen.dragged {
+  visibility: visible;
+}
+.image.dragged,
+.image.no-swipe {
+  -webkit-transition: none;
+  -moz-transition: none;
+  -ms-transition: none;
+  -o-transition: none;
+  transition: none;
+}
+.imggal-modal {
+  overflow: hidden;
+}

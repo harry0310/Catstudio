@@ -1,0 +1,24 @@
+<html>
+	<head>
+	</head>
+	<body>
+		<script	type='text/javascript'>
+			var	restaurant = 'http://play.google.com/store/apps/details?id=com.catstudio.restaurant';//跳转餐厅
+			var	commander = 'http://apk.hiapk.com//Download.aspx?aid=1693638&em=5&p=android';//跳转小小指挥官
+			var url = window.location.href;
+			var params	=	url.split('?')[1];
+			if(params.indexOf('&')	== -1) {
+				var	firstParamName	=	params.split('=')[0];	//参数名字
+				var	firstParamValue	=	params.split('=')[1];	//参数的值
+				if(firstParamName == 'game'){
+					if(firstParamValue ==	'commander') {
+						window.location.target='_blank';window.location.href	=	commander;
+					}
+					if(firstParamValue ==	'restaurant') {
+						window.location.target='_blank';window.location.href	=	restaurant;
+					}
+				}
+			}
+		</script>
+	</body>
+</html>

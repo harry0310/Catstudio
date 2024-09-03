@@ -1,0 +1,52 @@
+define( [ "jquery", "jsonrpc" ], function ($) {
+  var me = {};
+
+  JSONRpcClient.toplevel_ex_handler = function(e) {
+    if (console != null && console.log != null) {
+      console.log(e);
+    }
+  };
+
+  var client = null;
+  me.connect = function(shard) {
+    if (client == null) {
+      client = new JSONRpcClient("/shard/" + shard + "/json");
+    }
+  };
+
+  me.createLinkedNotebook = function(token, linkedNotebookSource) {
+    if (client != null) {
+      var linked = {
+          shardId : linkedNotebookSource.shardId,
+          sharedNotebookGlobalId : linkedNotebookSource.sharedNotebookGlobalId,
+          username : linkedNotebookSource.username,
+          shareName : linkedNotebookSource.shareName
+      };
+      return client.NoteStore.createLinkedNotebook(token, linked);
+    }
+  };
+
+  me.removeLinkedNotebook = function(token, sharedNotebookGlobalId) {
+    if (client != null) {
+      var linkedBooks = this.findLinkedNotebooks(token, sharedNotebookGlobalId);
+      $.each(linkedBooks, function() {
+        client.NoteStore.expungeLinkedNotebook(token, this.guid);
+      });
+    };
+  };
+
+  me.findLinkedNotebooks = function(token, sharedNotebookGlobalId) {
+    var ret = [];
+    if (client != null) {
+      var linkedBooks = client.NoteStore.listLinkedNotebooks(token);
+      $.each(linkedBooks.list, function() {
+        if (this.sharedNotebookGlobalId == sharedNotebookGlobalId) {
+          ret.push(this);
+        }
+      });
+    }
+    return ret;
+  };
+
+  return me;
+});

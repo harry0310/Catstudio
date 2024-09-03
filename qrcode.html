@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!-- saved from url=(0041)http://mgc2.mengdongshiji.com/qrcode.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=GBK">
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="expires" content="0">
+		
+    <title>萌娘餐厅2下载页面</title>
+    <script type="text/javascript">
+
+		var ua = navigator.userAgent.toLowerCase();  
+		if(ua.match(/MicroMessenger/i)=="micromessenger"){
+				
+		}else{
+				var Terminal = {
+            platform : function(){
+                var u = navigator.userAgent, app = navigator.appVersion;
+                return {
+                    android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1,
+                    iPhone: u.indexOf('iPhone') > -1 ,
+                    iPad: u.indexOf('iPad') > -1
+                };
+            }(),
+            language : (navigator.browserLanguage || navigator.language).toLowerCase()
+        }
+ 
+        var theUrl = 'https://at.umeng.com/HPfS5b';
+        theUrl = 'https://at.umeng.com/19vuua';
+        if(Terminal.platform.android){
+            theUrl = 'http://catstudio-common.oss-cn-hangzhou.aliyuncs.com/apks/mnct2.apk';
+        }else if(Terminal.platform.iPhone){
+            theUrl = 'http://itunes.apple.com/app/id1078814844';
+        }else if(Terminal.platform.iPad){
+            theUrl = 'http://itunes.apple.com/app/id1078814844';
+        }else {
+            theUrl = 'http://catstudio-common.oss-cn-hangzhou.aliyuncs.com/apks/mnct2.apk';
+        }
+ 
+ 
+        location.href = theUrl;
+		}
+        
+    </script></head></html>
